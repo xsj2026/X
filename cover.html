@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X</title>
+  <meta name="theme-color" content="#f7f3f0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="X" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/x-icon" href="xsj-logo.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f7f3f0;
+      --bg-warm: #fdf6f2;
+      --accent: #d4a5a5;
+      --accent-deep: #c08a8a;
+      --text: #5a4a45;
+      --text-light: #9a8a85;
+      --line: #e5ddd8;
+      --gold: #c9a96e;
+    }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: "Noto Serif SC", "Cormorant Garamond", serif;
+      color: var(--text);
+    }
+
+    body {
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    /* ===== 背景柔光 ===== */
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 600px 400px at 20% 30%, rgba(212,165,165,0.12), transparent 70%),
+        radial-gradient(ellipse 500px 500px at 80% 70%, rgba(201,169,110,0.08), transparent 70%);
+    }
+    .bg-grain {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.29 0 0 0 0 0.27 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ===== 主容器 ===== */
+    .cover {
+      position: relative; z-index: 2;
+      text-align: center;
+      animation: fadeIn 1.5s ease both;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Polaroid 相框 ===== */
+    .polaroid {
+      display: inline-block;
+      background: #fff;
+      padding: 16px 16px 50px 16px;
+      border-radius: 4px;
+      box-shadow:
+        0 1px 3px rgba(90,74,69,0.08),
+        0 12px 40px rgba(90,74,69,0.10);
+      transform: rotate(-2deg);
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+    }
+    .polaroid:hover {
+      transform: rotate(0deg) translateY(-6px);
+      box-shadow:
+        0 1px 3px rgba(90,74,69,0.06),
+        0 20px 60px rgba(90,74,69,0.14);
+    }
+    .polaroid::before {
+      content: "";
+      position: absolute; top: -8px; left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      width: 80px; height: 22px;
+      background: rgba(201,169,110,0.25);
+      border-radius: 2px;
+    }
+    .photo-frame {
+      width: 280px; height: 280px;
+      overflow: hidden; border-radius: 2px;
+      position: relative;
+      background: linear-gradient(135deg, #f0e6e0, #e8ddd5);
+    }
+    .photo-frame img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: contrast(0.95) saturate(0.88) brightness(1.02);
+      transition: transform 1.2s ease, filter 0.6s ease;
+    }
+    .polaroid:hover .photo-frame img {
+      transform: scale(1.06);
+      filter: contrast(1) saturate(1) brightness(1);
+    }
+    .polaroid-caption {
+      position: absolute; bottom: 14px; left: 0; right: 0;
+      text-align: center;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 15px; letter-spacing: 4px;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    /* ===== 品牌标题 ===== */
+    .brand {
+      margin-top: 48px;
+    }
+    .brand-eyebrow {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 13px; letter-spacing: 8px;
+      color: var(--gold); text-transform: uppercase;
+      margin-bottom: 16px; font-weight: 500;
+    }
+    .brand-title {
+      font-family: "Noto Serif SC", serif;
+      font-size: 38px; font-weight: 400;
+      color: var(--text); letter-spacing: 12px;
+      line-height: 1.2;
+    }
+    .brand-divider {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; margin: 20px 0;
+    }
+    .brand-divider .dline {
+      width: 50px; height: 1px;
+      background: var(--line);
+    }
+    .brand-divider .ddot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .brand-subtitle {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 16px; letter-spacing: 3px;
+      color: var(--text-light); font-style: italic;
+    }
+
+    /* ===== 日期 ===== */
+    .datetime {
+      margin-top: 32px;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 14px; letter-spacing: 2px;
+      color: var(--text-light);
+    }
+    .datetime .wk {
+      display: inline-block; margin-left: 8px;
+      padding: 2px 14px; border-radius: 20px;
+      border: 1px solid var(--line);
+      color: var(--accent-deep); font-size: 12px;
+      font-family: "Noto Serif SC", serif;
+    }
+
+    /* ===== 进入按钮 ===== */
+    .enter-btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      margin-top: 40px; padding: 14px 44px;
+      font-family: "Noto Serif SC", serif;
+      font-size: 15px; font-weight: 400;
+      color: var(--text); letter-spacing: 4px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 0;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative; overflow: hidden;
+    }
+    .enter-btn::before {
+      content: ""; position: absolute; inset: 0;
+      background: var(--accent);
+      transform: translateY(101%);
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: -1;
+    }
+    .enter-btn:hover {
+      color: #fff; border-color: var(--accent);
+    }
+    .enter-btn:hover::before {
+      transform: translateY(0);
+    }
+    .enter-btn .arrow {
+      transition: transform 0.4s ease;
+      font-family: serif;
+    }
+    .enter-btn:hover .arrow {
+      transform: translateX(6px);
+    }
+
+    /* ===== 底部 ===== */
+    .footer {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%); z-index: 3;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 12px; letter-spacing: 3px;
+      color: var(--text-light); opacity: 0.5;
+    }
+
+    /* ===== 侧边竖排文字 ===== */
+    .side-text {
+      position: fixed; z-index: 1;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 11px; letter-spacing: 4px;
+      color: var(--text-light); opacity: 0.35;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    .side-left { left: 30px; top: 50%; transform: translateY(-50%); }
+    .side-right { right: 30px; top: 50%; transform: translateY(-50%); }
+
+    /* ===== 角标 ===== */
+    .corner-mark {
+      position: fixed; z-index: 1;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 11px; letter-spacing: 3px;
+      color: var(--text-light); opacity: 0.4;
+    }
+    .mark-tl { top: 28px; left: 32px; }
+    .mark-tr { top: 28px; right: 32px; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 600px) {
+      .photo-frame { width: 220px; height: 220px; }
+      .brand-title { font-size: 28px; letter-spacing: 8px; }
+      .side-text, .corner-mark { display: none; }
+      .enter-btn { padding: 12px 32px; font-size: 14px; }
+    }
+    @media (max-width: 480px) {
+      .polaroid { padding: 12px 12px 40px 12px; }
+      .photo-frame { width: 180px; height: 180px; }
+      .brand { margin-top: 32px; }
+      .brand-title { font-size: 24px; letter-spacing: 6px; }
+      .brand-eyebrow { font-size: 11px; letter-spacing: 5px; }
+      .brand-subtitle { font-size: 14px; }
+      .datetime { font-size: 12px; }
+      .enter-btn { padding: 12px 28px; font-size: 13px; letter-spacing: 3px; }
+      .footer { bottom: 16px; font-size: 10px; }
+    }
+    @media (max-width: 360px) {
+      .photo-frame { width: 150px; height: 150px; }
+      .brand-title { font-size: 20px; letter-spacing: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="bg-grain"></div>
+
+  <!-- 角标 -->
+  <div class="corner-mark mark-tl">XSJ · 2026</div>
+  <div class="corner-mark mark-tr">DAILY · SPACE</div>
+
+  <!-- 侧边竖排文字 -->
+  <div class="side-text side-left">STAY · HAPPY · SMILE</div>
+  <div class="side-text side-right">开心 · 笑乐 · 每一天</div>
+
+  <!-- 主封面 -->
+  <div class="cover">
+    <!-- Polaroid 相框 -->
+    <div class="polaroid">
+      <div class="photo-frame">
+        <img src="xsj-logo.jpg" alt="XSJ" />
+      </div>
+      <div class="polaroid-caption">XSJ</div>
+    </div>
+
+    <!-- 品牌标题 -->
+    <div class="brand">
+      <div class="brand-eyebrow">My Little World</div>
+      <div class="brand-title">X</div>
+      <div class="brand-divider">
+        <span class="dline"></span>
+        <span class="ddot"></span>
+        <span class="dline"></span>
+      </div>
+      <div class="brand-subtitle">Every day is a gift</div>
+    </div>
+
+    <!-- 日期 -->
+    <div class="datetime" id="datetime"></div>
+
+    <!-- 进入按钮 -->
+    <a class="enter-btn" href="index.html">
+      <span>进 入 工 作 台</span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="footer">Made with care · X</div>
+
+  <script>
+    // ===== 日期时间 =====
+    const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const WEEKDAYS_CN = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    function updateDateTime() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const y = now.getFullYear();
+      const mo = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const wk = WEEKDAYS_CN[now.getDay()];
+      document.getElementById('datetime').innerHTML =
+        `${y}.${mo}.${d} &nbsp;·&nbsp; ${h}:${m} <span class="wk">${wk}</span>`;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // ===== Enter 键进入 =====
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        window.location.href = 'index.html';
+      }
+    });
+
+    // ===== PWA Service Worker 注册 =====
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('[SW] 注册成功', reg.scope);
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[SW] 新版本可用，刷新后生效');
+              }
+            });
+          });
+        }).catch(err => console.warn('[SW] 注册失败', err));
+      });
+    }
+  </script>
+</body>
+</html>
