@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐰 X</title>
+  <meta name="theme-color" content="#d4a5a5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="X" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/x-icon" href="xsj-logo.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ============= 侧边栏 ============= -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="user-pill">
+          <div class="user-avatar">🐰</div>
+          <div class="user-text">
+            <div class="user-title">X</div>
+          </div>
+          <span class="user-arrow">‹</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="mainNav">
+        <a class="nav-item active" data-page="plan" href="#plan">
+          <span class="nav-emoji">📅</span>
+          <span class="nav-label">每日计划</span>
+          <span class="nav-num">01</span>
+        </a>
+        <a class="nav-item" data-page="reading" href="#reading">
+          <span class="nav-emoji">📖</span>
+          <span class="nav-label">今日读书</span>
+          <span class="nav-num">02</span>
+        </a>
+        <a class="nav-item" data-page="dailylife" href="#dailylife">
+          <span class="nav-emoji">🌈</span>
+          <span class="nav-label">Daily Life</span>
+          <span class="nav-num">03</span>
+        </a>
+        <a class="nav-item" data-page="body" href="#body">
+          <span class="nav-emoji">🏃</span>
+          <span class="nav-label">身体塑形</span>
+          <span class="nav-num">04</span>
+        </a>
+        <a class="nav-item" data-page="exam" href="#exam">
+          <span class="nav-emoji">🍎</span>
+          <span class="nav-label">教资</span>
+          <span class="nav-num">05</span>
+        </a>
+        <a class="nav-item" data-page="english" href="#english">
+          <span class="nav-emoji">🇬🇧</span>
+          <span class="nav-label">英语学习</span>
+          <span class="nav-num">06</span>
+        </a>
+        <a class="nav-item" data-page="podcast" href="#podcast">
+          <span class="nav-emoji">🎧</span>
+          <span class="nav-label">播客</span>
+          <span class="nav-num">07</span>
+        </a>
+        <a class="nav-item" data-page="news" href="#news">
+          <span class="nav-emoji">🌍</span>
+          <span class="nav-label">每日新闻</span>
+          <span class="nav-num">08</span>
+        </a>
+        <a class="nav-item" data-page="beauty" href="#beauty">
+          <span class="nav-emoji">💅</span>
+          <span class="nav-label">变美技巧</span>
+          <span class="nav-num">09</span>
+        </a>
+        <a class="nav-item" data-page="job" href="#job">
+          <span class="nav-emoji">🚀</span>
+          <span class="nav-label">就业信息</span>
+          <span class="nav-num">10</span>
+        </a>
+        <a class="nav-item" data-page="food" href="#food">
+          <span class="nav-emoji">🍰</span>
+          <span class="nav-label">今日食谱</span>
+          <span class="nav-num">11</span>
+        </a>
+        <a class="nav-item" data-page="grad" href="#grad">
+          <span class="nav-emoji">🧠</span>
+          <span class="nav-label">研究生日常</span>
+          <span class="nav-num">12</span>
+        </a>
+        <a class="nav-item" data-page="finance" href="#finance">
+          <span class="nav-emoji">💰</span>
+          <span class="nav-label">理财</span>
+          <span class="nav-num">13</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="mini-card">
+          <span class="mini-icon">🌷</span>
+          <span>愿你闪闪发光</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============= 主体内容 ============= -->
+    <main class="main">
+      <!-- ============= 每日计划 ============= -->
+      <section class="page page-plan active" data-page="plan">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">📋</span>
+              <h1>每日计划</h1>
+            </div>
+            <p class="page-desc">今日事今日毕，每天都是新的开始～（每日自动重置）</p>
+          </div>
+          <button class="checkin-pill" id="planCheckin">
+            <span class="checkin-streak" id="planStreak">0</span>
+            <span class="checkin-label">连续打卡</span>
+            <span class="checkin-btn">
+              <span class="checkin-check">✅</span>
+              <span>今日打卡</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- 统计4宫格 -->
+        <div class="stats-grid">
+          <div class="stat-tile">
+            <div class="stat-tile-icon">📝</div>
+            <div class="stat-tile-num" id="statTotal">0</div>
+            <div class="stat-tile-label">今日任务</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-icon">✅</div>
+            <div class="stat-tile-num" id="statDone">0</div>
+            <div class="stat-tile-label">已完成</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-icon">⏳</div>
+            <div class="stat-tile-num" id="statPending">0</div>
+            <div class="stat-tile-label">待完成</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-icon">📈</div>
+            <div class="stat-tile-num" id="statRate">0%</div>
+            <div class="stat-tile-label">完成率</div>
+          </div>
+        </div>
+
+        <!-- 添加新任务 -->
+        <button class="add-task-main" id="addTaskMain">
+          <span class="add-plus">＋</span>
+          <span>添加新任务</span>
+        </button>
+
+        <!-- 任务输入框（默认隐藏） -->
+        <div class="add-task-expand" id="addTaskExpand" style="display:none">
+          <div class="add-task-row">
+            <input type="text" id="newTaskName" placeholder="输入新任务名称…" />
+            <select id="newTaskCol">
+              <option value="personal">个人日常</option>
+              <option value="creative">创作任务</option>
+            </select>
+            <select id="newTaskLink">
+              <option value="">无链接</option>
+              <option value="reading">今日读书</option>
+              <option value="dailylife">Daily Life</option>
+              <option value="body">身体塑形</option>
+              <option value="exam">教资</option>
+              <option value="english">英语学习</option>
+              <option value="podcast">播客</option>
+              <option value="news">每日新闻</option>
+              <option value="beauty">变美技巧</option>
+              <option value="job">就业信息</option>
+              <option value="food">今日食谱</option>
+              <option value="grad">研究生日常</option>
+              <option value="finance">理财</option>
+            </select>
+            <button class="btn-primary" id="confirmAddTask">添加</button>
+            <button class="btn-ghost" id="cancelAddTask">取消</button>
+          </div>
+        </div>
+
+        <!-- 双栏看板 -->
+        <div class="kanban">
+          <div class="kanban-col" data-col="personal">
+            <div class="col-head">
+              <div class="col-title">
+                <span class="dot" style="background:#ff6fa5"></span>
+                个人日常
+                <span class="col-count" id="countPersonal">0</span>
+              </div>
+              <div class="col-sub">日课 · 雷打不动</div>
+            </div>
+            <div class="task-list" id="listPersonal"></div>
+          </div>
+
+          <div class="kanban-col" data-col="creative">
+            <div class="col-head">
+              <div class="col-title">
+                <span class="dot" style="background:#a78bfa"></span>
+                创作任务
+                <span class="col-count" id="countCreative">0</span>
+              </div>
+              <div class="col-sub">趁热打铁</div>
+            </div>
+            <div class="task-list" id="listCreative"></div>
+          </div>
+        </div>
+
+        <!-- 本月打卡日历 -->
+        <div class="calendar-section">
+          <div class="calendar-card">
+            <div class="calendar-head">
+              <div>
+                <div class="calendar-title">📅 本月打卡</div>
+                <div class="calendar-sub" id="calendarMonth">2026年7月</div>
+              </div>
+              <div class="calendar-nav">
+                <button class="cal-nav-btn" id="calPrev" title="上一月">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="cal-nav-btn today" id="calToday" title="回到今天">今天</button>
+                <button class="cal-nav-btn" id="calNext" title="下一月">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+              <div class="cal-weekday">日</div>
+              <div class="cal-weekday">一</div>
+              <div class="cal-weekday">二</div>
+              <div class="cal-weekday">三</div>
+              <div class="cal-weekday">四</div>
+              <div class="cal-weekday">五</div>
+              <div class="cal-weekday">六</div>
+            </div>
+            <div class="calendar-legend">
+              <span><i class="legend-dot unchecked"></i>未打卡</span>
+              <span><i class="legend-dot checked"></i>已打卡</span>
+              <span><i class="legend-dot today"></i>今天</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= 锻炼身体（原身体塑形） ============= -->
+      <section class="page page-body" data-page="body">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">💪</span>
+              <h1>锻炼身体</h1>
+            </div>
+            <p class="page-desc">跟着视频一起练，每天 20-30 分钟，雕刻更好的自己</p>
+          </div>
+        </div>
+        <div class="body-intro">
+          <p class="body-tip">点击下方卡片即可在页面内播放，视频来源：B站</p>
+        </div>
+        <div class="body-tabs" id="bodyTabs"></div>
+        <div class="player-wrap" id="playerWrap">
+          <div class="player-empty">👈 从下方选一个视频开始今天的训练吧</div>
+        </div>
+        <div class="video-grid" id="videoGrid"></div>
+      </section>
+
+      <!-- ============= 备考计划（原教资） ============= -->
+      <section class="page page-exam" data-page="exam">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">📖</span>
+              <h1>备考计划</h1>
+            </div>
+            <p class="page-desc">笔试题库 + 面试视频，一起上岸</p>
+          </div>
+        </div>
+
+        <div class="teacher-subtabs">
+          <button class="teacher-subtab active" data-subtab="written">笔试</button>
+          <button class="teacher-subtab" data-subtab="interview">面试</button>
+        </div>
+
+        <div class="teacher-panel active" data-panel="written">
+          <div class="teacher-cats" id="writtenCats">
+            <button class="teacher-cat active" data-wcat="quiz">综合素质 · 题库</button>
+            <button class="teacher-cat" data-wcat="zhs-video">综合素质 · 讲课视频</button>
+            <button class="teacher-cat" data-wcat="jkn-video">教育知识与能力 · 讲课视频</button>
+          </div>
+          <div class="teacher-section active" data-wsection="quiz">
+            <div class="quiz-wrap">
+              <div class="quiz-topbar">
+                <div class="quiz-stats">
+                  <span class="quiz-stat">第 <b id="quizIndex">1</b>/<span id="quizTotal">20</span> 题</span>
+                  <span class="quiz-stat quiz-stat-correct">已答 <b id="quizAnswered">0</b></span>
+                  <span class="quiz-stat quiz-stat-rate">正确率 <b id="quizRate">—</b></span>
+                  <span class="quiz-stat quiz-stat-wrong">错题 <b id="quizWrongCount">0</b></span>
+                </div>
+                <div class="quiz-controls">
+                  <button class="quiz-mode-btn active" data-qmode="order">顺序练习</button>
+                  <button class="quiz-mode-btn" data-qmode="random">随机练习</button>
+                  <button class="quiz-mode-btn" data-qmode="wrong">错题重练</button>
+                  <button class="quiz-mode-btn quiz-reset" id="quizReset">重置</button>
+                </div>
+              </div>
+              <div class="quiz-card" id="quizCard"></div>
+              <div class="quiz-nav">
+                <button class="btn btn-ghost" id="quizPrev">← 上一题</button>
+                <div class="quiz-dots" id="quizDots"></div>
+                <button class="btn btn-ghost" id="quizNext">下一题 →</button>
+              </div>
+            </div>
+          </div>
+          <div class="teacher-section" data-wsection="zhs-video">
+            <div class="teacher-video-grid" id="zhsVideoGrid"></div>
+          </div>
+          <div class="teacher-section" data-wsection="jkn-video">
+            <div class="teacher-video-grid" id="jknVideoGrid"></div>
+          </div>
+        </div>
+
+        <div class="teacher-panel" data-panel="interview">
+          <div class="teacher-cats" id="interviewCats">
+            <button class="teacher-cat active" data-icat="skills">面试技巧</button>
+            <button class="teacher-cat" data-icat="psychology">心理健康教育 · 优秀讲课</button>
+            <button class="teacher-cat" data-icat="english">初中英语 · 优秀讲课</button>
+          </div>
+          <div class="teacher-section active" data-isection="skills">
+            <div class="teacher-video-grid" id="skillsVideoGrid"></div>
+          </div>
+          <div class="teacher-section" data-isection="psychology">
+            <div class="teacher-video-grid" id="psychVideoGrid"></div>
+          </div>
+          <div class="teacher-section" data-isection="english">
+            <div class="teacher-video-grid" id="engVideoGrid"></div>
+          </div>
+        </div>
+
+        <div class="player-wrap" id="teacherPlayerWrap" style="display:none;">
+          <div class="player-head">
+            <div class="player-title" id="teacherPlayerTitle"></div>
+            <a class="player-link" id="teacherPlayerLink" href="#" target="_blank" rel="noopener">在B站打开 ↗</a>
+          </div>
+          <div class="player-box">
+            <iframe id="teacherPlayerFrame" src="" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= 今日读书 ============= -->
+      <section class="page page-reading" data-page="reading">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">📖</span>
+              <h1>今日读书</h1>
+            </div>
+            <p class="page-desc">每天读一点，时间会给你答案</p>
+          </div>
+        </div>
+        <div class="reading-layout">
+          <div class="read-card read-current">
+            <div class="read-head">
+              <div class="read-tag">📖 正在阅读</div>
+              <button class="btn-mini" id="addBookBtn">+ 添加书目</button>
+            </div>
+            <div class="read-list" id="readingList"></div>
+          </div>
+          <div class="read-card read-notes">
+            <div class="read-head">
+              <div class="read-tag">✍️ 读书笔记 / 摘录</div>
+              <span class="read-sub">随时记录打动你的句子</span>
+            </div>
+            <div class="note-input-wrap">
+              <textarea id="noteInput" class="note-input" placeholder="写下今天的摘录或感悟，回车保存（Shift+回车换行）…"></textarea>
+            </div>
+            <div class="note-list" id="noteList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= Daily Life ============= -->
+      <section class="page page-dailylife" data-page="dailylife">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">🌸</span>
+              <h1>Daily Life</h1>
+            </div>
+            <p class="page-desc">记录生活里的小确幸与碎碎念</p>
+          </div>
+        </div>
+        <div class="life-layout">
+          <div class="life-mood">
+            <div class="life-card">
+              <div class="read-head">
+                <div class="read-tag">🌸 今日心情</div>
+                <span class="read-sub">选一个最贴近今天的表情</span>
+              </div>
+              <div class="mood-section">
+                <div class="mood-label mood-label-up">活力满满</div>
+                <div class="mood-row" id="moodRowUp">
+                  <span class="mood" data-mood="🤩" title="超激动">🤩</span>
+                  <span class="mood" data-mood="😊" title="开心">😊</span>
+                  <span class="mood" data-mood="🥰" title="被爱包围">🥰</span>
+                  <span class="mood" data-mood="😎" title="自信">😎</span>
+                  <span class="mood" data-mood="🥳" title="庆祝">🥳</span>
+                  <span class="mood" data-mood="😄" title="快乐">😄</span>
+                </div>
+              </div>
+              <div class="mood-section">
+                <div class="mood-label mood-label-calm">平和从容</div>
+                <div class="mood-row" id="moodRowCalm">
+                  <span class="mood" data-mood="😌" title="满足">😌</span>
+                  <span class="mood" data-mood="🙂" title="还行">🙂</span>
+                  <span class="mood" data-mood="🙏" title="感恩">🙏</span>
+                  <span class="mood" data-mood="🧘" title="禅意">🧘</span>
+                  <span class="mood" data-mood="😴" title="困倦">😴</span>
+                  <span class="mood" data-mood="🥱" title="打哈欠">🥱</span>
+                </div>
+              </div>
+              <div class="mood-section">
+                <div class="mood-label mood-label-down">需要充电</div>
+                <div class="mood-row" id="moodRowDown">
+                  <span class="mood" data-mood="🤔" title="思考">🤔</span>
+                  <span class="mood" data-mood="🫠" title="融化">🫠</span>
+                  <span class="mood" data-mood="😲" title="惊讶">😲</span>
+                  <span class="mood" data-mood="😣" title="烦躁">😣</span>
+                  <span class="mood" data-mood="😰" title="焦虑">😰</span>
+                  <span class="mood" data-mood="😢" title="难过">😢</span>
+                  <span class="mood" data-mood="😡" title="生气">😡</span>
+                  <span class="mood" data-mood="😩" title="疲惫">😩</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="life-diary">
+            <div class="life-card">
+              <div class="read-head">
+                <div class="read-tag">📝 碎碎念日记</div>
+                <button class="btn-mini" id="addDiaryBtn">＋ 添加</button>
+              </div>
+              <!-- 日期导航 -->
+              <div class="diary-date-nav">
+                <button class="cal-nav-btn" id="diaryDatePrev" title="前一天">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="diary-date-display" id="diaryDateDisplay"></div>
+                <button class="cal-nav-btn" id="diaryDateNext" title="后一天">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="cal-nav-btn today" id="diaryDateToday">今天</button>
+              </div>
+              <!-- 添加碎碎念输入区 -->
+              <div class="diary-add-expand" id="addDiaryExpand" style="display:none">
+                <textarea id="diaryInput" class="note-input" placeholder="今天发生了什么值得记住的事？Shift+回车换行，Enter 或点添加保存…" style="min-height:80px;margin-bottom:10px"></textarea>
+                <div class="diary-add-actions">
+                  <button class="btn-primary" id="confirmAddDiary">添加</button>
+                  <button class="btn-ghost" id="cancelAddDiary">取消</button>
+                </div>
+              </div>
+              <!-- 当日心情展示 -->
+              <div class="diary-mood-display" id="diaryMoodDisplay"></div>
+              <!-- 碎碎念列表 -->
+              <div class="diary-list" id="diaryList"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= 英语学习 ============= -->
+      <section class="page page-english" data-page="english">
+        <div class="eng-hero">
+          <div class="eng-hero-text">
+            <div class="eng-hero-title">🇬🇧 学习英语</div>
+            <div class="eng-hero-sub">听力 · 词汇 · 阅读 · 每日积累</div>
+          </div>
+          <button class="eng-checkin" id="engCheckinBtn">
+            <span class="eng-checkin-icon">💿</span>
+            <span class="eng-checkin-text">学完打卡</span>
+          </button>
+        </div>
+
+        <div class="eng-card">
+          <div class="eng-section-title">
+            <span class="eng-section-icon">📚</span>
+            <span>推荐学习资源</span>
+          </div>
+          <div class="eng-resource-list" id="engResourceList"></div>
+        </div>
+
+        <div class="eng-card">
+          <div class="eng-section-title">
+            <span class="eng-section-icon">🗺️</span>
+            <span>学习路径</span>
+          </div>
+          <div class="eng-path" id="engPathList"></div>
+        </div>
+
+        <div class="eng-card">
+          <div class="eng-section-title eng-flex">
+            <div><span class="eng-section-icon">🎬</span><span>口语学习 · 跟着美剧电影练</span></div>
+            <button class="eng-mini-add" id="engAddWordMini" title="添加生词">＋</button>
+          </div>
+          <div class="eng-oral-grid" id="engOralGrid"></div>
+        </div>
+      </section>
+
+      <!-- ============= 播客 ============= -->
+      <section class="page page-podcast" data-page="podcast">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">🎧</span>
+              <h1>播客</h1>
+            </div>
+            <p class="page-desc">通勤、做饭、做家务时听一听，碎片时间也闪闪发光</p>
+          </div>
+        </div>
+        <div class="podcast-grid" id="podcastGrid"></div>
+      </section>
+
+      <!-- ============= 每日新闻 ============= -->
+      <section class="page page-news" data-page="news">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">📰</span>
+              <h1>每日新闻</h1>
+            </div>
+            <p class="page-desc">关注天下事，做个有格局的人</p>
+          </div>
+        </div>
+        <div class="news-layout">
+          <div class="news-left">
+            <div class="news-card">
+              <div class="read-head">
+                <div class="read-tag">📝 今日新闻摘要</div>
+                <button class="btn-mini" id="saveNewsBtn">保存</button>
+              </div>
+              <textarea id="newsInput" class="memo-input" style="min-height:200px" placeholder="写下今天的重要新闻、热点事件…&#10;例如：&#10;1. xxx&#10;2. xxx&#10;3. xxx"></textarea>
+              <div class="news-saved-list" id="newsSavedList"></div>
+            </div>
+            <div class="news-card">
+              <div class="read-tag">🔗 新闻资讯入口</div>
+              <div class="news-links" id="newsLinks"></div>
+            </div>
+          </div>
+          <div class="news-right">
+            <div class="news-card">
+              <div class="read-tag">📺 央视新闻视频</div>
+              <div class="teacher-video-grid" id="newsVideoGrid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= 变美技巧 ============= -->
+      <section class="page page-beauty" data-page="beauty">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">💄</span>
+              <h1>变美技巧</h1>
+            </div>
+            <p class="page-desc">穿搭 · 化妆 · 饰品，发现更美的自己</p>
+          </div>
+        </div>
+        <div class="eng-subtabs">
+          <button class="eng-subtab active" data-bsub="outfit">穿搭</button>
+          <button class="eng-subtab" data-bsub="makeup">化妆</button>
+          <button class="eng-subtab" data-bsub="accessory">饰品</button>
+        </div>
+        <div class="eng-panel active" data-bpanel="outfit">
+          <div class="body-intro"><p class="body-tip">平价穿搭灵感 + 博主推荐，学生党也能美美的</p></div>
+          <div class="beauty-section">
+            <div class="beauty-sub-title">🛍️ 平价穿搭入口</div>
+            <div class="beauty-links" id="outfitLinks"></div>
+          </div>
+          <div class="beauty-section">
+            <div class="beauty-sub-title">🎬 穿搭博主视频</div>
+            <div class="teacher-video-grid" id="outfitVideoGrid"></div>
+          </div>
+        </div>
+        <div class="eng-panel" data-bpanel="makeup">
+          <div class="body-intro"><p class="body-tip">从零基础到进阶，跟着博主学化妆</p></div>
+          <div class="beauty-section">
+            <div class="beauty-sub-title">🛍️ 平价美妆入口</div>
+            <div class="beauty-links" id="makeupLinks"></div>
+          </div>
+          <div class="beauty-section">
+            <div class="beauty-sub-title">🎬 美妆博主视频</div>
+            <div class="teacher-video-grid" id="makeupVideoGrid"></div>
+          </div>
+        </div>
+        <div class="eng-panel" data-bpanel="accessory">
+          <div class="body-intro"><p class="body-tip">小饰品大亮点，点亮整体穿搭</p></div>
+          <div class="beauty-section">
+            <div class="beauty-sub-title">🛍️ 饰品好物入口</div>
+            <div class="beauty-links" id="accLinks"></div>
+          </div>
+          <div class="beauty-section">
+            <div class="beauty-sub-title">🎬 饰品搭配视频</div>
+            <div class="teacher-video-grid" id="accVideoGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= 就业信息 ============= -->
+      <section class="page page-job" data-page="job">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">💼</span>
+              <h1>就业信息</h1>
+            </div>
+            <p class="page-desc">考公考编倒计时 + 山东省就业招聘信息</p>
+          </div>
+        </div>
+        <div class="countdown-grid" id="countdownGrid"></div>
+        <div class="beauty-section" style="margin-top:24px">
+          <div class="beauty-sub-title">🔗 山东省就业招聘信息入口</div>
+          <div class="beauty-links" id="jobLinks"></div>
+        </div>
+      </section>
+
+      <!-- ============= 今日食谱 ============= -->
+      <section class="page page-food" data-page="food">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">🍳</span>
+              <h1>今日食谱</h1>
+            </div>
+            <p class="page-desc">好好吃饭，是对自己最基本的温柔～</p>
+          </div>
+        </div>
+        <!-- 今日吃什么记录 -->
+        <div class="food-today-card">
+          <div class="read-head">
+            <div class="read-tag">🍽️ 今日吃什么</div>
+            <button class="btn-mini" id="randomFoodBtn">🎲 随机推荐</button>
+          </div>
+          <div class="food-random-hint" id="randomFoodHint" style="display:none"></div>
+          <button class="add-task-main" id="addFoodBtn" style="margin-top:12px">
+            <span class="add-plus">＋</span>
+            <span>记录今天吃的</span>
+          </button>
+          <div class="add-task-expand" id="addFoodExpand" style="display:none">
+            <div class="add-task-row">
+              <input type="text" id="newFoodName" placeholder="菜名（如：番茄炒蛋）" />
+              <select id="newFoodMeal">
+                <option value="早餐">🌅 早餐</option>
+                <option value="午餐">☀️ 午餐</option>
+                <option value="晚餐">🌙 晚餐</option>
+                <option value="零食">🍰 零食</option>
+              </select>
+              <select id="newFoodRate">
+                <option value="😋">😋 好吃</option>
+                <option value="🤤">🤤 超好吃</option>
+                <option value="😊">😊 还行</option>
+                <option value="😐">😐 一般</option>
+                <option value="😖">😖 踩雷</option>
+              </select>
+              <input type="text" id="newFoodNote" placeholder="备注（选填）" />
+              <button class="btn-primary" id="confirmAddFood">添加</button>
+              <button class="btn-ghost" id="cancelAddFood">取消</button>
+            </div>
+          </div>
+          <div class="food-today-stats" id="foodTodayStats"></div>
+          <div class="food-record-list" id="foodRecordList"></div>
+        </div>
+
+        <!-- 我的收藏菜单 -->
+        <div class="food-menu-card">
+          <div class="read-head">
+            <div class="read-tag">⭐ 我的收藏菜单</div>
+            <span class="read-sub">吃过觉得好吃的，收藏起来下次做</span>
+          </div>
+          <button class="add-task-main" id="addMenuBtn" style="margin-top:12px">
+            <span class="add-plus">＋</span>
+            <span>添加收藏菜单</span>
+          </button>
+          <div class="add-task-expand" id="addMenuExpand" style="display:none">
+            <div class="add-task-row">
+              <input type="text" id="newMenuName" placeholder="菜名（如：红烧排骨）" />
+              <input type="text" id="newMenuRecipe" placeholder="简单做法（选填）" />
+              <button class="btn-primary" id="confirmAddMenu">添加</button>
+              <button class="btn-ghost" id="cancelAddMenu">取消</button>
+            </div>
+          </div>
+          <div class="food-menu-grid" id="foodMenuGrid"></div>
+        </div>
+
+        <div class="beauty-section">
+          <div class="beauty-sub-title">🔍 找食谱</div>
+          <div class="beauty-links" id="foodLinks"></div>
+        </div>
+        <div class="beauty-section">
+          <div class="beauty-sub-title">🎬 村驴做饭教学视频（B站）</div>
+          <div class="teacher-video-grid" id="foodVideoGrid"></div>
+        </div>
+      </section>
+
+      <!-- ============= 研究生日常 ============= -->
+      <section class="page page-grad" data-page="grad">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">🎓</span>
+              <h1>研究生日常</h1>
+            </div>
+            <p class="page-desc">文献阅读 · 科研进度 · 导师沟通 · 课程笔记</p>
+          </div>
+        </div>
+        <div class="grad-layout">
+          <div class="grad-col">
+            <div class="news-card">
+              <div class="read-head">
+                <div class="read-tag">📄 文献阅读记录</div>
+                <button class="btn-mini" id="addPaperBtn">+ 添加</button>
+              </div>
+              <div class="add-task-expand" id="addPaperExpand" style="display:none">
+                <div class="add-task-row">
+                  <input type="text" id="newPaperTitle" placeholder="论文标题" />
+                  <input type="text" id="newPaperNote" placeholder="笔记（选填）" />
+                  <button class="btn-primary" id="confirmAddPaper">添加</button>
+                  <button class="btn-ghost" id="cancelAddPaper">取消</button>
+                </div>
+              </div>
+              <div class="word-list" id="paperList"></div>
+            </div>
+            <div class="news-card">
+              <div class="read-head">
+                <div class="read-tag">📋 本周科研任务</div>
+                <button class="btn-mini" id="addResearchBtn">+ 添加</button>
+              </div>
+              <div class="add-task-expand" id="addResearchExpand" style="display:none">
+                <div class="add-task-row">
+                  <input type="text" id="newResearch" placeholder="科研任务…" />
+                  <button class="btn-primary" id="confirmAddResearch">添加</button>
+                  <button class="btn-ghost" id="cancelAddResearch">取消</button>
+                </div>
+              </div>
+              <div class="word-list" id="researchList"></div>
+            </div>
+          </div>
+          <div class="grad-col">
+            <div class="news-card">
+              <div class="read-head">
+                <div class="read-tag">💬 导师沟通记录</div>
+                <button class="btn-mini" id="saveMentorBtn">保存</button>
+              </div>
+              <textarea id="mentorInput" class="memo-input" style="min-height:160px" placeholder="记录与导师的沟通要点、下一步计划…"></textarea>
+            </div>
+            <div class="news-card">
+              <div class="read-head">
+                <div class="read-tag">📝 课程笔记</div>
+                <button class="btn-mini" id="saveCourseBtn">保存</button>
+              </div>
+              <textarea id="courseInput" class="memo-input" style="min-height:160px" placeholder="课程名称、重点内容、待复习知识点…"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= 理财 ============= -->
+      <section class="page page-finance" data-page="finance">
+        <div class="page-header">
+          <div>
+            <div class="page-title-row">
+              <span class="page-title-icon">💰</span>
+              <h1>理财</h1>
+            </div>
+            <p class="page-desc">记账 · 存钱 · 慢慢变富，从大学开始 🐷</p>
+          </div>
+        </div>
+
+        <!-- 今日花销 -->
+        <div class="news-card finance-card">
+          <div class="read-head">
+            <div class="read-tag">💸 今日花销</div>
+            <div class="finance-total" id="spendTodayTotal">今日 ¥0</div>
+          </div>
+          <div class="finance-stat-row" id="spendCatStats"></div>
+          <button class="add-task-main" id="addSpendBtn">
+            <span class="add-plus">＋</span>
+            <span>记一笔花销</span>
+          </button>
+          <div class="add-task-expand" id="addSpendExpand" style="display:none">
+            <div class="add-task-row">
+              <input type="text" id="newSpendName" placeholder="买了啥（如：奶茶）" />
+              <select id="newSpendCat">
+                <option value="🍜 餐饮">🍜 餐饮</option>
+                <option value="🛍️ 购物">🛍️ 购物</option>
+                <option value="🚌 交通">🚌 交通</option>
+                <option value="🎮 娱乐">🎮 娱乐</option>
+                <option value="📚 学习">📚 学习</option>
+                <option value="💊 其他">💊 其他</option>
+              </select>
+              <input type="number" id="newSpendAmount" placeholder="金额" min="0" step="0.01" style="width:110px" />
+              <button class="btn-primary" id="confirmAddSpend">添加</button>
+              <button class="btn-ghost" id="cancelAddSpend">取消</button>
+            </div>
+          </div>
+          <div class="spend-list" id="spendList"></div>
+        </div>
+
+        <!-- 存钱罐 -->
+        <div class="news-card finance-card">
+          <div class="read-head">
+            <div class="read-tag">🐷 存钱罐</div>
+            <button class="btn-mini" id="editGoalBtn">设置目标</button>
+          </div>
+          <div class="save-progress-wrap">
+            <div class="save-bar"><div class="save-bar-fill" id="saveBarFill"></div></div>
+            <div class="save-nums">
+              <span>已存 <b id="saveCurrent">¥0</b></span>
+              <span>目标 <b id="saveTarget">¥0</b></span>
+              <span class="save-percent" id="savePercent">0%</span>
+            </div>
+          </div>
+          <div class="save-input-row">
+            <input type="number" id="saveAddAmount" placeholder="金额" min="0" step="1" style="width:120px" />
+            <button class="btn-primary" id="saveDepositBtn">存入</button>
+            <button class="btn-ghost" id="saveWithdrawBtn">取出</button>
+          </div>
+        </div>
+
+        <!-- 学习理财 -->
+        <div class="beauty-section">
+          <div class="beauty-sub-title">🎬 大学生理财入门视频（B站）</div>
+          <div class="teacher-video-grid" id="financeVideoGrid"></div>
+        </div>
+        <div class="beauty-section">
+          <div class="beauty-sub-title">📌 过来人理财建议总结</div>
+          <div class="finance-tips" id="financeTips"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============= 删除确认弹窗 ============= -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-box">
+      <div class="modal-title">确认删除？</div>
+      <div class="modal-text" id="deleteText">删除后无法恢复</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelDelete">取消</button>
+        <button class="btn btn-danger" id="confirmDelete">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= 英语学习 · 添加生词弹窗 ============= -->
+  <div class="modal" id="wordModal">
+    <div class="modal-box" style="max-width: 420px;">
+      <div class="modal-title">📝 添加生词</div>
+      <div class="eng-word-form">
+        <input type="text" id="newWord" placeholder="单词 / 短语" />
+        <input type="text" id="newWordMean" placeholder="释义（选填）" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelWord">取消</button>
+        <button class="btn btn-primary" id="confirmAddWord">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <!-- PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('[SW] Service Worker 已注册');
+        }).catch(err => console.warn('[SW] 注册失败', err));
+      });
+    }
+  </script>
+</body>
+</html>
