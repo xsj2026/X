@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐰 X</title>
+  <title>🐰 开心肖笑乐</title>
   <meta name="theme-color" content="#d4a5a5" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="X" />
+  <meta name="apple-mobile-web-app-title" content="开心肖笑乐" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/x-icon" href="xsj-logo.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -21,7 +21,7 @@
         <div class="user-pill">
           <div class="user-avatar">🐰</div>
           <div class="user-text">
-            <div class="user-title">X</div>
+            <div class="user-title">开心肖笑乐</div>
           </div>
           <span class="user-arrow">‹</span>
         </div>
@@ -871,15 +871,5 @@
   </div>
 
   <script src="script.js"></script>
-  <!-- PWA Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('[SW] Service Worker 已注册');
-        }).catch(err => console.warn('[SW] 注册失败', err));
-      });
-    }
-  </script>
 </body>
 </html>

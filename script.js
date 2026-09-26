@@ -1492,7 +1492,7 @@ function switchPage(page) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
   document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.dataset.page === page));
   const meta = PAGE_TITLES[page] || PAGE_TITLES.plan;
-  document.title = meta.title + ' · 🐰 X';
+  document.title = meta.title + ' · 🐰 开心肖笑乐';
   if (page === 'exam') { renderQuiz(); renderAllTeacherVideos(); }
   if (page === 'reading') { renderBooks(); renderNotes(); }
   if (page === 'dailylife') { renderMood(); renderDiary(); }

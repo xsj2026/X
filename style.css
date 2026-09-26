@@ -1207,52 +1207,6 @@ html, body {
   .quiz-controls { width: 100%; }
 }
 
-/* ============= 手机端深度适配 ============= */
-@media (max-width: 480px) {
-  html { font-size: 13px; }
-  .page { padding: 14px 14px 16px; }
-  .page-header h1 { font-size: 20px; }
-  .page-desc { font-size: 12px; }
-  .stats-grid { gap: 10px; }
-  .stat-tile { padding: 14px 10px; }
-  .stat-tile-num { font-size: 24px; }
-  .kanban-col { min-height: 200px; padding: 14px; }
-  .calendar-card { max-width: 100%; }
-  .mood { width: 44px; height: 44px; font-size: 24px; }
-  .eng-hero { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .eng-checkin { width: 100%; }
-  .eng-oral-grid { grid-template-columns: repeat(2, 1fr); }
-  .podcast-grid { grid-template-columns: 1fr; }
-  .countdown-grid { grid-template-columns: repeat(2, 1fr); }
-  .cd-number { font-size: 36px; }
-  .food-menu-grid { grid-template-columns: 1fr; }
-  .modal-box { min-width: 280px; margin: 0 16px; }
-  .checkin-pill { align-self: flex-start; }
-  .add-task-main { padding: 12px; font-size: 14px; }
-  .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 12px; }
-  .quiz-option { padding: 10px 12px; }
-  .quiz-opt-letter { width: 24px; height: 24px; font-size: 12px; }
-  .news-layout { grid-template-columns: 1fr; }
-  .grad-layout { grid-template-columns: 1fr; }
-  .finance-tips { grid-template-columns: 1fr; }
-  .video-grid { grid-template-columns: 1fr; }
-  .teacher-video-grid { grid-template-columns: 1fr; }
-  .eng-resource-item { padding: 12px; }
-  .eng-resource-icon { width: 36px; height: 36px; font-size: 18px; }
-  .sidebar { width: 56px; padding: 12px 6px; }
-  .nav-emoji { font-size: 18px; width: 26px; }
-  .user-avatar { width: 30px; height: 30px; font-size: 18px; }
-}
-
-/* 超小屏手机 */
-@media (max-width: 360px) {
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .eng-oral-grid { grid-template-columns: 1fr; }
-  .countdown-grid { grid-template-columns: 1fr; }
-  .sidebar { width: 48px; padding: 10px 4px; }
-  .nav-emoji { font-size: 16px; width: 22px; }
-}
-
 /* ============= 英语学习 / 变美技巧 子标签 ============= */
 .eng-subtabs {
   display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
