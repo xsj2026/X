@@ -37,6 +37,70 @@ function loadJSON(key, fallback) {
 }
 function saveJSON(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  // ☁️ 云同步：本地有改动 → 通知同步模块（防抖上传到 GitHub）
+  try { if (window.WBSync && window.WBSync.markDirty) window.WBSync.markDirty(); } catch (e) {}
+}
+
+// ==================== 云同步：界面整体重绘 ====================
+// 云端数据被拉取并写入本地后，先把各模块「内存中的状态变量」重新从
+// localStorage 读一遍，再重绘界面 —— 否则界面仍显示旧数据。
+// 注意：云端数据可能字段不全（旧版本/部分同步），一律用默认值兜底补齐，
+// 避免出现 tasks.creative 之类 undefined 导致渲染报错。
+function wbDeepFill(val, fallback) {
+  if (val === undefined || val === null) return JSON.parse(JSON.stringify(fallback));
+  if (Array.isArray(fallback)) return Array.isArray(val) ? val : JSON.parse(JSON.stringify(fallback));
+  if (typeof fallback === 'object' && fallback !== null) {
+    const out = (typeof val === 'object' && val !== null && !Array.isArray(val)) ? Object.assign({}, val) : {};
+    Object.keys(fallback).forEach(k => { out[k] = wbDeepFill(val[k], fallback[k]); });
+    return out;
+  }
+  return val;
+}
+function loadMerged(key, fallback) {
+  return wbDeepFill(loadJSON(key, fallback), fallback);
+}
+
+function reloadAllState() {
+  checkinData   = loadJSON(CALENDAR_KEY, {});
+  tasks         = loadMerged(TASK_KEY, DEFAULT_TASKS);
+  books         = loadJSON(BOOK_KEY, DEFAULT_BOOKS);
+  readNotes     = loadJSON(NOTE_KEY, []);
+  diary         = loadJSON(DIARY_KEY, []);
+  englishData   = loadMerged(ENGLISH_KEY, { words: [], lastDate: '', checkin: '' });
+  newsData      = loadMerged(NEWS_KEY, { summaries: [], currentText: '' });
+  foodTodayData = loadMerged(FOOD_TODAY_KEY, { records: [] });
+  foodMenuData  = loadMerged(FOOD_MENU_KEY, { menus: [] });
+  paperData     = loadMerged(PAPER_KEY, { papers: [] });
+  researchData  = loadMerged(RESEARCH_KEY, { tasks: [] });
+  mentorData    = loadMerged(MENTOR_KEY, { text: '' });
+  courseData    = loadMerged(COURSE_KEY, { text: '' });
+  spendData     = loadMerged(SPEND_KEY, { records: [] });
+  saveData      = loadMerged(SAVE_KEY, { target: 0, current: 0 });
+  loadMood();
+  loadQuizState();
+}
+
+// 云端数据应用后，重载状态 + 重绘全部界面
+function refreshAllUI() {
+  try {
+    reloadAllState();
+    renderCalendar(); renderCheckinPills(); renderTasks();
+    renderBooks(); renderNotes();
+    renderMood(); renderDiary();
+    renderVideos();
+    buildQuizOrder(); renderQuiz();
+    renderEnglish();
+    renderNewsPage();
+    renderBeauty();
+    renderCountdowns();
+    renderFood(); renderFoodToday(); renderFoodMenu();
+    renderGrad();
+    renderSpend(); renderSave();
+    renderPodcasts();
+    applyNavOrder();
+    // 同步输入框里的已保存文本
+    try { const el = document.getElementById('newsInput'); if (el) el.value = (newsData.currentText || ''); } catch (e) {}
+  } catch (e) { console.warn('[WBSync] refreshAllUI error', e); }
 }
 function fmtTime(ts) {
   const d = new Date(ts);
@@ -189,7 +253,7 @@ const DEFAULT_TASKS = {
   ],
 };
 const TASK_KEY = 'workbuddy.tasks.v1';
-let tasks = loadJSON(TASK_KEY, DEFAULT_TASKS);
+let tasks = loadMerged(TASK_KEY, DEFAULT_TASKS);
 // 一次性清理：移除已废弃的「运营例行」默认任务
 (function purgeYunying() {
   let changed = false;
@@ -857,7 +921,7 @@ function switchTeacherSubtab(sub) {
 
 // ==================== 英语学习 ====================
 const ENGLISH_KEY = 'workbuddy.english.v1';
-let englishData = loadJSON(ENGLISH_KEY, { words: [], lastDate: '', checkin: '' });
+let englishData = loadMerged(ENGLISH_KEY, { words: [], lastDate: '', checkin: '' });
 function saveEnglish() { saveJSON(ENGLISH_KEY, englishData); }
 
 function renderVocabStats() {
@@ -1033,7 +1097,7 @@ function renderPodcasts() {
 
 // ==================== 每日新闻 ====================
 const NEWS_KEY = 'workbuddy.news.v1';
-let newsData = loadJSON(NEWS_KEY, { summaries: [], currentText: '' });
+let newsData = loadMerged(NEWS_KEY, { summaries: [], currentText: '' });
 function saveNewsData() { saveJSON(NEWS_KEY, newsData); }
 const NEWS_LINKS = [
   { icon: '📺', name: '央视新闻官网', url: 'https://tv.cctv.com/lm/xwzb/day/index.shtml' },
@@ -1235,7 +1299,7 @@ function renderFood() {
 
 // ---- 今日吃什么记录 ----
 const FOOD_TODAY_KEY = 'workbuddy.food.today.v1';
-let foodTodayData = loadJSON(FOOD_TODAY_KEY, { records: [] });
+let foodTodayData = loadMerged(FOOD_TODAY_KEY, { records: [] });
 function saveFoodToday() { saveJSON(FOOD_TODAY_KEY, foodTodayData); }
 const RANDOM_FOODS = [
   '🍜 来碗热腾腾的面条吧', '🍳 煎蛋配吐司，简单又好吃', '🥗 来个轻食沙拉', '🍲 炖个排骨汤暖暖胃',
@@ -1299,7 +1363,7 @@ function randomFood() {
 
 // ---- 收藏菜单 ----
 const FOOD_MENU_KEY = 'workbuddy.food.menu.v1';
-let foodMenuData = loadJSON(FOOD_MENU_KEY, { menus: [] });
+let foodMenuData = loadMerged(FOOD_MENU_KEY, { menus: [] });
 function saveFoodMenu() { saveJSON(FOOD_MENU_KEY, foodMenuData); }
 function renderFoodMenu() {
   const grid = document.getElementById('foodMenuGrid');
@@ -1334,10 +1398,10 @@ const PAPER_KEY = 'workbuddy.papers.v1';
 const RESEARCH_KEY = 'workbuddy.research.v1';
 const MENTOR_KEY = 'workbuddy.mentor.v1';
 const COURSE_KEY = 'workbuddy.course.v1';
-let paperData = loadJSON(PAPER_KEY, { papers: [] });
-let researchData = loadJSON(RESEARCH_KEY, { tasks: [] });
-let mentorData = loadJSON(MENTOR_KEY, { text: '' });
-let courseData = loadJSON(COURSE_KEY, { text: '' });
+let paperData = loadMerged(PAPER_KEY, { papers: [] });
+let researchData = loadMerged(RESEARCH_KEY, { tasks: [] });
+let mentorData = loadMerged(MENTOR_KEY, { text: '' });
+let courseData = loadMerged(COURSE_KEY, { text: '' });
 function savePapers() { saveJSON(PAPER_KEY, paperData); }
 function saveResearch() { saveJSON(RESEARCH_KEY, researchData); }
 function saveMentor() { saveJSON(MENTOR_KEY, mentorData); }
@@ -1369,8 +1433,8 @@ function renderGrad() {
 // ==================== 理财 ====================
 const SPEND_KEY = 'workbuddy.finance.spend.v1';
 const SAVE_KEY = 'workbuddy.finance.save.v1';
-let spendData = loadJSON(SPEND_KEY, { records: [] });
-let saveData = loadJSON(SAVE_KEY, { target: 0, current: 0 });
+let spendData = loadMerged(SPEND_KEY, { records: [] });
+let saveData = loadMerged(SAVE_KEY, { target: 0, current: 0 });
 function saveSpend() { saveJSON(SPEND_KEY, spendData); }
 function saveSave() { saveJSON(SAVE_KEY, saveData); }
 
@@ -1862,4 +1926,11 @@ document.addEventListener('DOMContentLoaded', () => {
   applyNavOrder();
   setupNavReorder();
   updateNavNumbers();
+
+  // ☁️ 启动云同步：初始化后若云端有更新，自动重绘界面
+  if (window.WBSync) {
+    window.WBSync.onRemoteApplied(refreshAllUI);
+    window.WBSync.init();
+    if (window.WBSyncUI) window.WBSyncUI.mount();
+  }
 });
