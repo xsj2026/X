@@ -1698,3 +1698,129 @@ html, body {
 .empty-hint {
   padding: 20px; text-align: center; color: var(--text-mute); font-size: 14px;
 }
+
+/* ============= 健康 ============= */
+.page-health .health-head-right { display: flex; align-items: center; gap: 10px; }
+.health-rate {
+  font-size: 12px; color: var(--text-soft); background: var(--bg-soft);
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+
+/* 习惯打卡 */
+.habit-list { display: flex; flex-direction: column; gap: 10px; }
+.habit-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--bg-soft); border: 1px solid var(--line-soft);
+  border-radius: 12px; padding: 12px 14px; transition: all .2s;
+}
+.habit-row:hover { border-color: var(--line); box-shadow: var(--shadow-sm); }
+.habit-meta { flex: 1; min-width: 0; }
+.habit-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.habit-sub { font-size: 12px; color: var(--text-mute); margin-top: 3px; }
+.habit-action { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.habit-check {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid var(--line); background: #fff; color: #fff;
+  font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.habit-check:hover { border-color: var(--primary); }
+.habit-check.done { background: var(--success); border-color: var(--success); }
+.habit-counter {
+  display: flex; align-items: center; gap: 6px;
+  background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 2px 6px;
+}
+.habit-counter button {
+  width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--bg-soft); color: var(--text-soft); font-size: 14px; line-height: 1;
+  transition: all .15s;
+}
+.habit-counter button:hover { background: var(--primary); color: #fff; }
+.habit-counter span { min-width: 24px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text); }
+.habit-number {
+  width: 84px; padding: 6px 8px; border-radius: 8px; font-size: 13px;
+  border: 1px solid var(--line); background: #fff; color: var(--text); font-family: inherit;
+}
+.habit-del {
+  padding: 4px 10px; border: none; border-radius: 8px; cursor: pointer;
+  background: transparent; color: var(--danger); font-size: 12px; font-family: inherit;
+  transition: all .2s;
+}
+.habit-del:hover { background: var(--danger); color: #fff; }
+
+/* 30 天热力图 */
+.heatmap-wrap { margin-top: 18px; }
+.heat-title { font-size: 12px; color: var(--text-mute); margin-bottom: 8px; }
+.habit-heat { display: flex; flex-direction: column; gap: 5px; overflow-x: auto; padding-bottom: 4px; }
+.heat-row { display: grid; grid-template-columns: 90px repeat(30, minmax(9px, 1fr)); gap: 3px; align-items: center; }
+.heat-label {
+  font-size: 12px; color: var(--text-soft); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.heat-cell { display: block; height: 13px; border-radius: 3px; background: var(--line-soft); }
+.heat-cell.l1 { background: #f8d3d3; }
+.heat-cell.l2 { background: #ef9ea6; }
+.heat-cell.l3 { background: var(--primary); }
+
+/* 健康卡片网格 */
+.health-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+}
+.health-metrics {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px;
+}
+.hm-item {
+  background: var(--bg-soft); border-radius: 12px; padding: 12px 14px;
+  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+}
+.hm-item span { font-size: 12px; color: var(--text-mute); }
+.hm-item b { font-size: 19px; font-weight: 700; color: var(--text); }
+.hm-item i { font-size: 11px; font-style: normal; color: var(--text-mute); }
+
+/* 体重趋势图 */
+.chart-box {
+  background: var(--bg-soft); border-radius: 12px; padding: 10px 8px 6px; min-height: 60px;
+}
+.chart-box svg { display: block; }
+.chart-empty { text-align: center; color: var(--text-mute); font-size: 13px; padding: 22px 0; }
+.chart-legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-mute); padding: 2px 6px 4px; }
+.chart-legend .lg-lg-line { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: var(--primary); }
+.chart-legend .lg-thin { display: inline-block; width: 18px; height: 2px; border-radius: 2px; background: #f0b6b6; }
+
+/* 体测记录列表 */
+.measure-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.measure-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-soft); border-radius: 10px; padding: 9px 12px;
+}
+.measure-date { font-size: 12px; color: var(--text-mute); min-width: 46px; }
+.measure-weight { font-size: 14px; font-weight: 700; color: var(--text); }
+.measure-fat { font-size: 12px; color: var(--text-soft); flex: 1; }
+.health-tip { font-size: 12px; color: var(--text-soft); line-height: 1.7; margin-top: 4px; }
+
+/* 本周训练计划 */
+.plan-list { display: flex; flex-direction: column; gap: 8px; }
+.plan-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-soft); border-radius: 10px; padding: 10px 12px;
+}
+.plan-row.done .plan-text { text-decoration: line-through; color: var(--text-mute); }
+.plan-week { font-size: 12px; font-weight: 600; color: var(--primary); min-width: 32px; }
+.plan-text { flex: 1; font-size: 13px; color: var(--text); }
+.mini-status {
+  padding: 4px 10px; border-radius: 999px; cursor: pointer; font-size: 11px;
+  border: 1px solid var(--line); background: #fff; color: var(--text-soft); font-family: inherit;
+  transition: all .15s; white-space: nowrap;
+}
+.mini-status:hover { border-color: var(--primary); color: var(--primary); }
+.plan-row.done .mini-status { background: #e8f9ee; border-color: #bfe7cd; color: #3a9b5a; }
+
+@media (max-width: 1100px) {
+  .health-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .health-metrics { grid-template-columns: 1fr; }
+  .heat-row { grid-template-columns: 72px repeat(30, minmax(7px, 1fr)); }
+  .habit-row { flex-direction: column; align-items: flex-start; }
+  .habit-action { width: 100%; justify-content: space-between; }
+}
