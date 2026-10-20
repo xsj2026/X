@@ -75,6 +75,8 @@ function reloadAllState() {
   mentorData    = loadMerged(MENTOR_KEY, { text: '' });
   courseData    = loadMerged(COURSE_KEY, { text: '' });
   spendData     = loadMerged(SPEND_KEY, { records: [] });
+  habitData     = loadMerged(HABIT_KEY, { habits: [], logs: {} });
+  bodyData      = loadMerged(BODY_KEY, { measures: [], calories: [], plans: [], goal: { startWeight: 0, targetWeight: 0, height: 0, targetCalories: 0 } });
   saveData      = loadMerged(SAVE_KEY, { target: 0, current: 0 });
   loadMood();
   loadQuizState();
@@ -96,6 +98,7 @@ function refreshAllUI() {
     renderFood(); renderFoodToday(); renderFoodMenu();
     renderGrad();
     renderSpend(); renderSave();
+    renderHealth();
     renderPodcasts();
     applyNavOrder();
     // 同步输入框里的已保存文本
@@ -121,6 +124,7 @@ const PAGE_TITLES = {
   exam:      { title: '教资',       desc: '笔试题库 + 面试视频，一起上岸' },
   reading:   { title: '今日读书',   desc: '每天读一点，时间会给你答案' },
   dailylife: { title: 'Daily Life', desc: '记录生活里的小确幸与碎碎念' },
+  health:    { title: '健康',       desc: '习惯打卡 · 身体数据 · 减脂目标' },
   english:   { title: '英语学习',   desc: 'Every word brings you closer to fluency!' },
   podcast:   { title: '播客',       desc: '通勤、做饭、做家务时听一听' },
   news:      { title: '每日新闻',   desc: '关注天下事，做个有格局的人' },
@@ -1560,6 +1564,7 @@ function switchPage(page) {
   if (page === 'exam') { renderQuiz(); renderAllTeacherVideos(); }
   if (page === 'reading') { renderBooks(); renderNotes(); }
   if (page === 'dailylife') { renderMood(); renderDiary(); }
+  if (page === 'health') { renderHealth(); }
   if (page === 'english') { renderEnglish(); }
   if (page === 'podcast') { renderPodcasts(); }
   if (page === 'news') { renderNewsPage(); }
@@ -1868,6 +1873,376 @@ function bindEvents() {
   document.getElementById('editGoalBtn').addEventListener('click', editGoal);
   document.getElementById('saveDepositBtn').addEventListener('click', depositSave);
   document.getElementById('saveWithdrawBtn').addEventListener('click', withdrawSave);
+
+  // 健康 - 习惯打卡
+  toggleExpand('addHabitBtn', 'addHabitExpand', 'confirmAddHabit', 'cancelAddHabit', addHabit);
+  const habitListEl = document.getElementById('habitList');
+  if (habitListEl) {
+    habitListEl.addEventListener('click', e => {
+      const check = e.target.closest('[data-habit-check]');
+      if (check) {
+        const h = habitData.habits.find(x => x.id === check.dataset.habitCheck);
+        if (h) { const done = habitValueOf(h.id, todayKey()) >= (healthNum(h.target) || 1); setHabitValue(h.id, done ? 0 : (healthNum(h.target) || 1)); }
+        return;
+      }
+      const plus = e.target.closest('[data-habit-plus]');
+      if (plus) { const h = habitData.habits.find(x => x.id === plus.dataset.habitPlus); setHabitValue(plus.dataset.habitPlus, habitValueOf(plus.dataset.habitPlus, todayKey()) + (h && h.method === '数值' ? 0.5 : 1)); return; }
+      const minus = e.target.closest('[data-habit-minus]');
+      if (minus) { const h = habitData.habits.find(x => x.id === minus.dataset.habitMinus); setHabitValue(minus.dataset.habitMinus, Math.max(0, habitValueOf(minus.dataset.habitMinus, todayKey()) - (h && h.method === '数值' ? 0.5 : 1))); return; }
+      const del = e.target.closest('[data-habit-del]');
+      if (del) { habitData.habits = habitData.habits.filter(h => h.id !== del.dataset.habitDel); saveHabitData(); renderHealth(); }
+    });
+    habitListEl.addEventListener('change', e => {
+      const inp = e.target.closest('[data-habit-value]');
+      if (inp) setHabitValue(inp.dataset.habitValue, Number(inp.value) || 0);
+    });
+  }
+
+  // 健康 - 身体数据
+  toggleExpand('addMeasureBtn', 'addMeasureExpand', 'confirmAddMeasure', 'cancelAddMeasure', addMeasure);
+  const measureDateEl = document.getElementById('measureDate');
+  if (measureDateEl) measureDateEl.value = todayKey();
+  const measureListEl = document.getElementById('measureList');
+  if (measureListEl) {
+    measureListEl.addEventListener('click', e => {
+      const del = e.target.closest('[data-measure-del]');
+      if (del) { bodyData.measures = (bodyData.measures || []).filter(m => m.id !== del.dataset.measureDel); saveBodyData(); renderHealth(); }
+    });
+  }
+
+  // 健康 - 今日热量
+  const calBtn = document.getElementById('addCalorieBtn');
+  if (calBtn) {
+    const cal = (bodyData.calories || []).find(c => c.date === todayKey()) || {};
+    const intakeEl = document.getElementById('calIntake');
+    const burnEl = document.getElementById('calBurn');
+    if (intakeEl) intakeEl.value = cal.intake || '';
+    if (burnEl) burnEl.value = cal.burn || '';
+  }
+  toggleExpand('addCalorieBtn', 'addCalorieExpand', 'confirmAddCalorie', 'cancelAddCalorie', saveCalorie);
+
+  // 健康 - 减脂目标
+  const healthGoalBtn = document.getElementById('healthGoalBtn');
+  if (healthGoalBtn) healthGoalBtn.addEventListener('click', openHealthGoal);
+  toggleExpand('healthGoalBtn', 'editGoalExpand', 'confirmEditGoal', 'cancelEditGoal', saveHealthGoal);
+
+  // 健康 - 本周训练计划
+  toggleExpand('addPlanBtn', 'addPlanExpand', 'confirmAddPlan', 'cancelAddPlan', addPlan);
+  const planListEl = document.getElementById('planList');
+  if (planListEl) {
+    planListEl.addEventListener('click', e => {
+      const toggle = e.target.closest('[data-plan-toggle]');
+      if (toggle) {
+        const p = (bodyData.plans || []).find(x => x.id === toggle.dataset.planToggle);
+        if (p) { p.status = p.status === '已完成' ? '待完成' : '已完成'; saveBodyData(); renderHealth(); }
+        return;
+      }
+      const del = e.target.closest('[data-plan-del]');
+      if (del) { bodyData.plans = (bodyData.plans || []).filter(p => p.id !== del.dataset.planDel); saveBodyData(); renderHealth(); }
+    });
+  }
+}
+
+/* ============================================================
+   健康 · 习惯打卡 + 身体数据 + 减脂目标 + 训练计划
+   ============================================================ */
+const HABIT_KEY = 'workbuddy.health.habit.v1';
+const BODY_KEY  = 'workbuddy.health.body.v1';
+
+let habitData = loadMerged(HABIT_KEY, { habits: [], logs: {} });
+let bodyData  = loadMerged(BODY_KEY, { measures: [], calories: [], plans: [], goal: { startWeight: 0, targetWeight: 0, height: 0, targetCalories: 0 } });
+
+const PLAN_WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+function saveHabitData() { saveJSON(HABIT_KEY, habitData); }
+function saveBodyData() { saveJSON(BODY_KEY, bodyData); }
+
+function healthNum(v) { const n = Number(v); return isNaN(n) ? 0 : n; }
+function healthClamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function healthAddDays(dateStr, n) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function healthSortedMeasures() {
+  return [...(bodyData.measures || [])].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+}
+
+/* ---------------- 习惯打卡 ---------------- */
+function habitValueOf(id, date) {
+  const day = (habitData.logs || {})[date] || {};
+  return healthNum(day[id]);
+}
+function habitRatioOf(h, date) {
+  const target = healthNum(h.target) || 1;
+  return healthClamp(habitValueOf(h.id, date) / target, 0, 1);
+}
+function setHabitValue(id, val) {
+  if (!habitData.logs) habitData.logs = {};
+  const d = todayKey();
+  if (!habitData.logs[d]) habitData.logs[d] = {};
+  habitData.logs[d][id] = Math.max(0, healthNum(val));
+  saveHabitData();
+  renderHealth();
+}
+function addHabit() {
+  const name = document.getElementById('newHabitName').value.trim();
+  if (!name) return;
+  const method = document.getElementById('newHabitMethod').value;
+  const target = healthNum(document.getElementById('newHabitTarget').value) || 1;
+  const unit = document.getElementById('newHabitUnit').value.trim();
+  habitData.habits.push({ id: uid(), name, method, target, unit });
+  saveHabitData(); renderHealth();
+  document.getElementById('newHabitName').value = '';
+  document.getElementById('newHabitTarget').value = '';
+  document.getElementById('newHabitUnit').value = '';
+}
+function renderHabits() {
+  const listEl = document.getElementById('habitList');
+  if (!listEl) return;
+  const habits = habitData.habits || [];
+  const t = todayKey();
+  if (!habits.length) {
+    listEl.innerHTML = '<div class="empty-hint">还没有习惯，从一个每天 2 分钟的小动作开始吧 🌱</div>';
+  } else {
+    listEl.innerHTML = habits.map(h => {
+      const v = habitValueOf(h.id, t);
+      const target = healthNum(h.target) || 1;
+      const done = v >= target;
+      let action = '';
+      if (h.method === '计数') {
+        action = `<div class="habit-counter"><button type="button" data-habit-minus="${h.id}">−</button><span>${v}</span><button type="button" data-habit-plus="${h.id}">＋</button></div>`;
+      } else if (h.method === '数值') {
+        action = `<input class="habit-number" type="number" step="0.5" min="0" value="${v || ''}" placeholder="0" data-habit-value="${h.id}">`;
+      } else {
+        action = `<button type="button" class="habit-check ${done ? 'done' : ''}" data-habit-check="${h.id}">${done ? '✓' : ''}</button>`;
+      }
+      return `<div class="habit-row">
+        <div class="habit-meta">
+          <div class="habit-name">${escapeHtml(h.name)}</div>
+          <div class="habit-sub">目标 ${escapeHtml(String(target))} ${escapeHtml(h.unit || '')} · ${escapeHtml(h.method || '勾选')} · 今日 ${v}</div>
+        </div>
+        <div class="habit-action">${action}<button type="button" class="habit-del" data-habit-del="${h.id}">删除</button></div>
+      </div>`;
+    }).join('');
+  }
+
+  // 过去 30 天热力图
+  const heatEl = document.getElementById('habitHeat');
+  const rateEl = document.getElementById('habitMonthRate');
+  if (!heatEl) return;
+  if (!habits.length) { heatEl.innerHTML = '<div class="empty-hint">打卡之后，这里会长出一片小花园 🌷</div>'; if (rateEl) rateEl.textContent = '0% 完成'; return; }
+  const dates = [];
+  for (let i = 29; i >= 0; i--) dates.push(healthAddDays(t, -i));
+  let html = '', total = 0, count = 0;
+  habits.forEach(h => {
+    html += `<div class="heat-row"><span class="heat-label">${escapeHtml(h.name)}</span>`;
+    dates.forEach(d => {
+      const r = habitRatioOf(h, d);
+      total += r; count++;
+      const level = r >= 1 ? 3 : r >= 0.5 ? 2 : r > 0 ? 1 : 0;
+      html += `<i class="heat-cell l${level}" title="${d} · ${Math.round(r * 100)}%"></i>`;
+    });
+    html += '</div>';
+  });
+  heatEl.innerHTML = html;
+  if (rateEl) rateEl.textContent = (count ? Math.round(total / count * 100) : 0) + '% 完成';
+}
+
+/* ---------------- 身体数据 ---------------- */
+function addMeasure() {
+  const date = document.getElementById('measureDate').value || todayKey();
+  const weight = healthNum(document.getElementById('measureWeight').value);
+  const bodyFat = healthNum(document.getElementById('measureFat').value);
+  if (!weight) { alert('请填写体重～'); return; }
+  bodyData.measures = bodyData.measures || [];
+  const exist = bodyData.measures.find(m => m.date === date);
+  if (exist) { exist.weight = weight; exist.bodyFat = bodyFat; }
+  else bodyData.measures.push({ id: uid(), date, weight, bodyFat });
+  const g = bodyData.goal || {};
+  if (!healthNum(g.startWeight)) { bodyData.goal = Object.assign({}, g, { startWeight: weight }); }
+  saveBodyData(); renderHealth();
+  document.getElementById('measureWeight').value = '';
+  document.getElementById('measureFat').value = '';
+}
+function renderBodyStats() {
+  const rows = healthSortedMeasures();
+  const cur = rows[rows.length - 1] || {};
+  const recent = rows.slice(-7);
+  const avg = recent.length ? recent.reduce((s, r) => s + healthNum(r.weight), 0) / recent.length : 0;
+  const height = healthNum((bodyData.goal || {}).height);
+  const bmi = healthNum(cur.weight) && height ? healthNum(cur.weight) / Math.pow(height / 100, 2) : 0;
+  const fatRow = [...rows].reverse().find(m => healthNum(m.bodyFat) > 0) || {};
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('hmWeight', healthNum(cur.weight) ? healthNum(cur.weight).toFixed(1) : '—');
+  setTxt('hmAvg', avg ? avg.toFixed(1) : '—');
+  setTxt('hmBmi', bmi ? bmi.toFixed(1) : '—');
+  setTxt('hmFat', healthNum(fatRow.bodyFat) ? healthNum(fatRow.bodyFat).toFixed(1) : '—');
+  setTxt('healthWeight', healthNum(cur.weight) ? healthNum(cur.weight).toFixed(1) : '—');
+}
+function renderMeasureList() {
+  const el = document.getElementById('measureList');
+  if (!el) return;
+  const rows = healthSortedMeasures().slice(-6).reverse();
+  if (!rows.length) { el.innerHTML = '<div class="empty-hint">还没有体测记录，先记一次今天的体重吧 ⚖️</div>'; return; }
+  el.innerHTML = rows.map(r => `<div class="measure-row">
+      <span class="measure-date">${escapeHtml(String(r.date || '').slice(5))}</span>
+      <span class="measure-weight">${healthNum(r.weight).toFixed(1)} kg</span>
+      <span class="measure-fat">${healthNum(r.bodyFat) ? '体脂 ' + healthNum(r.bodyFat).toFixed(1) + '%' : '—'}</span>
+      <button type="button" class="habit-del" data-measure-del="${r.id}">删除</button>
+    </div>`).join('');
+}
+function renderWeightChart() {
+  const box = document.getElementById('weightChart');
+  if (!box) return;
+  const rows = healthSortedMeasures().filter(r => healthNum(r.weight) > 0).slice(-30);
+  if (rows.length < 2) { box.innerHTML = '<div class="chart-empty">记录两次以上体测，这里就会出现体重趋势图 📈</div>'; return; }
+  const W = 560, H = 200, PL = 36, PR = 14, PT = 16, PB = 28;
+  const vals = rows.map(r => healthNum(r.weight));
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const span = (max - min) || 1;
+  const lo = min - span * 0.2, hi = max + span * 0.2;
+  const xAt = i => PL + (W - PL - PR) * (rows.length === 1 ? 0.5 : i / (rows.length - 1));
+  const yAt = v => PT + (H - PT - PB) * (1 - (v - lo) / (hi - lo));
+  const avgAt = rows.map((_, i) => {
+    const win = rows.slice(Math.max(0, i - 6), i + 1);
+    return win.reduce((s, r) => s + healthNum(r.weight), 0) / win.length;
+  });
+  const daily = rows.map((r, i) => `${xAt(i).toFixed(1)},${yAt(healthNum(r.weight)).toFixed(1)}`).join(' ');
+  const avg = avgAt.map((v, i) => `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`).join(' ');
+  const dots = rows.map((r, i) => `<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(healthNum(r.weight)).toFixed(1)}" r="2.4" fill="#c8161d" opacity="0.65"></circle>`).join('');
+  const grid = [0, 0.5, 1].map(p => {
+    const y = PT + (H - PT - PB) * p;
+    const v = hi - (hi - lo) * p;
+    return `<line x1="${PL}" y1="${y.toFixed(1)}" x2="${W - PR}" y2="${y.toFixed(1)}" stroke="#f2d6d6" stroke-width="1"></line>
+            <text x="${PL - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10" fill="#b08a8a">${v.toFixed(1)}</text>`;
+  }).join('');
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="200" preserveAspectRatio="none" role="img" aria-label="体重趋势">
+      ${grid}
+      <polyline points="${daily}" fill="none" stroke="#f0b6b6" stroke-width="1.5"></polyline>
+      <polyline points="${avg}" fill="none" stroke="#c8161d" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"></polyline>
+      ${dots}
+      <text x="${PL}" y="${H - 8}" font-size="10" fill="#b08a8a">${escapeHtml(String(rows[0].date || '').slice(5))}</text>
+      <text x="${W - PR}" y="${H - 8}" text-anchor="end" font-size="10" fill="#b08a8a">${escapeHtml(String(rows[rows.length - 1].date || '').slice(5))}</text>
+    </svg>
+    <div class="chart-legend"><span class="lg-lg-line"></span>7 日均线 · <span class="lg-thin"></span>每日体重</div>`;
+}
+
+/* ---------------- 今日热量 ---------------- */
+function saveCalorie() {
+  const intake = healthNum(document.getElementById('calIntake').value);
+  const burn = healthNum(document.getElementById('calBurn').value);
+  const d = todayKey();
+  bodyData.calories = bodyData.calories || [];
+  const rec = bodyData.calories.find(c => c.date === d);
+  if (rec) { rec.intake = intake; rec.burn = burn; }
+  else bodyData.calories.push({ id: uid(), date: d, intake, burn });
+  saveBodyData(); renderHealth();
+}
+function renderCalorie() {
+  const d = todayKey();
+  const cal = (bodyData.calories || []).find(c => c.date === d) || {};
+  const targetCal = healthNum((bodyData.goal || {}).targetCalories);
+  const intake = healthNum(cal.intake), burn = healthNum(cal.burn);
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('hmIntake', intake ? String(Math.round(intake)) : '—');
+  setTxt('hmBurn', burn ? String(Math.round(burn)) : '—');
+  setTxt('hmTargetCal', targetCal ? String(Math.round(targetCal)) : '—');
+  const hasData = intake || burn;
+  const gap = targetCal ? (targetCal - intake + burn) : (hasData ? (burn - intake) : null);
+  setTxt('hmGap', gap === null ? '—' : String(Math.round(gap)));
+  setTxt('healthGap', gap === null ? '—' : String(Math.round(gap)));
+  const tip = document.getElementById('calorieTip');
+  if (tip) {
+    if (gap === null) tip.textContent = '记录今天的摄入与消耗，才知道缺口在哪里。';
+    else if (gap >= 0) tip.textContent = targetCal ? `今天缺口 ${Math.round(gap)} kcal，稳住 💪` : `今天净缺口 ${Math.round(gap)} kcal，很棒 ✨`;
+    else tip.textContent = `今天超出 ${Math.abs(Math.round(gap))} kcal，明天轻轻补回来就好 🌿`;
+  }
+}
+
+/* ---------------- 减脂目标 ---------------- */
+function saveHealthGoal() {
+  const g = bodyData.goal || {};
+  const start = healthNum(document.getElementById('goalStartInput').value);
+  const target = healthNum(document.getElementById('goalTargetInput').value);
+  const height = healthNum(document.getElementById('goalHeightInput').value);
+  const cal = healthNum(document.getElementById('goalCalInput').value);
+  bodyData.goal = {
+    startWeight: start || healthNum(g.startWeight),
+    targetWeight: target || healthNum(g.targetWeight),
+    height: height || healthNum(g.height),
+    targetCalories: cal || healthNum(g.targetCalories),
+  };
+  saveBodyData(); renderHealth();
+}
+function openHealthGoal() {
+  const g = bodyData.goal || {};
+  document.getElementById('goalStartInput').value = healthNum(g.startWeight) || '';
+  document.getElementById('goalTargetInput').value = healthNum(g.targetWeight) || '';
+  document.getElementById('goalHeightInput').value = healthNum(g.height) || '';
+  document.getElementById('goalCalInput').value = healthNum(g.targetCalories) || '';
+}
+function renderGoal() {
+  const rows = healthSortedMeasures();
+  const cur = rows[rows.length - 1] || {};
+  const g = bodyData.goal || {};
+  const start = healthNum(g.startWeight) || healthNum(rows[0] && rows[0].weight);
+  const target = healthNum(g.targetWeight);
+  const curW = healthNum(cur.weight);
+  const progress = (start && target && curW) ? healthClamp((start - curW) / (start - target) * 100, 0, 100) : 0;
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('goalStart', start ? start.toFixed(1) + 'kg' : '—');
+  setTxt('goalTarget', target ? target.toFixed(1) + 'kg' : '—');
+  setTxt('goalPercent', Math.round(progress) + '%');
+  setTxt('hmHeight', healthNum(g.height) ? healthNum(g.height).toFixed(1) : '—');
+  const toGoal = (curW && target) ? Math.max(0, curW - target) : null;
+  setTxt('hmToGoal', toGoal === null ? '—' : toGoal.toFixed(1));
+  setTxt('healthGoalPct', Math.round(progress) + '%');
+  const bar = document.getElementById('goalBarFill');
+  if (bar) bar.style.width = progress + '%';
+}
+
+/* ---------------- 本周训练计划 ---------------- */
+function addPlan() {
+  const weekday = document.getElementById('planWeekday').value;
+  const plan = document.getElementById('planText').value.trim();
+  if (!plan) return;
+  bodyData.plans = bodyData.plans || [];
+  bodyData.plans.push({ id: uid(), weekday, plan, status: '待完成' });
+  saveBodyData(); renderHealth();
+  document.getElementById('planText').value = '';
+}
+function renderPlans() {
+  const el = document.getElementById('planList');
+  if (!el) return;
+  const plans = [...(bodyData.plans || [])].sort((a, b) => PLAN_WEEKDAYS.indexOf(a.weekday) - PLAN_WEEKDAYS.indexOf(b.weekday));
+  if (!plans.length) { el.innerHTML = '<div class="empty-hint">先安排两次真正做得到的运动 🏃‍♀️</div>'; return; }
+  el.innerHTML = plans.map(p => `<div class="plan-row ${p.status === '已完成' ? 'done' : ''}">
+      <span class="plan-week">${escapeHtml(p.weekday)}</span>
+      <span class="plan-text">${escapeHtml(p.plan)}</span>
+      <button type="button" class="mini-status" data-plan-toggle="${p.id}">${escapeHtml(p.status || '待完成')}</button>
+      <button type="button" class="habit-del" data-plan-del="${p.id}">删除</button>
+    </div>`).join('');
+}
+
+/* ---------------- 顶部 4 宫格 ---------------- */
+function renderHealthTop() {
+  const habits = habitData.habits || [];
+  const t = todayKey();
+  const rate = habits.length ? Math.round(habits.reduce((s, h) => s + habitRatioOf(h, t), 0) / habits.length * 100) : 0;
+  const el = document.getElementById('healthHabitRate');
+  if (el) el.textContent = rate + '%';
+}
+
+function renderHealth() {
+  renderHealthTop();
+  renderHabits();
+  renderBodyStats();
+  renderMeasureList();
+  renderWeightChart();
+  renderCalorie();
+  renderGoal();
+  renderPlans();
 }
 
 // ==================== 手机端 App 深链接跳转 ====================
@@ -1922,6 +2297,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCountdowns();
   renderFood();
   renderGrad();
+  renderHealth();
   bindEvents();
   applyNavOrder();
   setupNavReorder();
